@@ -1,0 +1,41 @@
+{{- if .Values.uiserver.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-server
+  labels:
+    app: ui-server
+spec:
+  replicas: {{ .Values.uiserver.replicaCount }}
+  selector:
+    matchLabels:
+      app: ui-server
+  template:
+    metadata:
+      labels:
+        app: ui-server
+    spec:
+      containers:
+        - name: ui-server
+          image: "{{ .Values.uiserver.image.repository }}:{{ .Values.uiserver.image.tag }}"
+          imagePullPolicy: {{ .Values.uiserver.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.uiserver.service.port }}
+          env:
+            {{- range .Values.uiserver.additionalEnv }}
+            - name: {{ .name }}
+              value: {{ .value }}
+            {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui-server
+spec:
+  ports:
+    - port: {{ .Values.uiserver.service.port }}
+      targetPort: {{ .Values.uiserver.service.port }}
+  selector:
+    app: ui-server
+{{- end }}
